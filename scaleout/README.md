@@ -35,8 +35,17 @@ oc new-app stenote/nginx-hostname
 oc expose svc nginx-hostname
 ```
 
+以下でURLを確認し、アプリケーション画面を表示してみる。
+
+```
+oc get route nginx-hostname --template='{{.spec.host}}
+```
+
+ホスト名=Pod名であることに言及する。
+
 ## スケールアウト
 管理コンソールから実行
+![Scaleout](scaleout_1.png)
 
 CLIから実行
 
@@ -45,8 +54,21 @@ oc scale dc nginx-hostname --replicas=4
 ```
 
 ## スケールアウト結果確認
+Pod一覧
+
 ```
-COUNTER=0; while [ $COUNTER -lt 10 ]; do curl -s http://$(oc get route nginx-hostname --template='{{.spec.host}}' -n scaleout) ; let COUNTER=COUNTER+1 ; done
+oc get po
+```
+
+ロードバランス確認
+
+```
+COUNTER=0; \
+while [ $COUNTER -lt 10 ]; \
+do
+  curl -s http://$(oc get route nginx-hostname --template='{{.spec.host}}' -n scaleout) ; \
+let COUNTER=COUNTER+1 ; \
+done
 ```
 
 ## オートヒーリング
@@ -54,11 +76,16 @@ COUNTER=0; while [ $COUNTER -lt 10 ]; do curl -s http://$(oc get route nginx-hos
 
 ```
 $ oc get po
-$ oc delete po PODNAME
+$ oc delete po <PODNAME>
 ```
 
 以下でPodのロケーション(配置先Node)を確認できる。
 
 ```
 $ oc get pods -o wide
+```
+
+## 後始末
+```
+oc delete project scaleout
 ```
