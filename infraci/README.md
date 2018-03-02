@@ -14,6 +14,7 @@ https://github.com/OpenShiftDemos/os-sample-php
 s2iビルドでこちらをビルドしておき、ベースイメージをphp:latestに変更しておく。
 
 ```
+oc login $OCP_MASTER
 oc new-project infraci
 oc new-app https://github.com/OpenShiftDemos/os-sample-php
 oc patch bc os-sample-php -p \
@@ -29,7 +30,7 @@ oc expose svc os-sample-php
 以下でURLを確認し、アプリケーション画面を表示してみる。
 
 ```
-oc get route os-sample-php --template='{{.spec.host}}
+oc get route os-sample-php --template='{{.spec.host}}'
 ```
 
 ![infraci_1](infraci_1.png)
