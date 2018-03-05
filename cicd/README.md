@@ -133,23 +133,23 @@ items:
         type: GitHub
       - generic:
           secret: FiArdDBH
-      type: Generic
+          type: Generic
     strategy:
       type: "JenkinsPipeline"
       jenkinsPipelineStrategy:
         jenkinsfile: |
-node {
-    stage ("Build")
-          echo '*** Build Starting ***'
-          openshiftBuild bldCfg: 'cotd', buildName: '', checkForTriggeredDeployments: 'false', commitID: '', namespace: '', showBuildLogs: 'true', verbose: 'true'
-          openshiftVerifyBuild bldCfg: 'cotd', checkForTriggeredDeployments: 'false', namespace: '', verbose: 'false'
-          echo '*** Build Complete ***'
-    stage ("Deploy and Verify in Development Env")
-          echo '*** Deployment Starting ***'
-          openshiftDeploy depCfg: 'cotd', namespace: '', verbose: 'false', waitTime: ''
-          openshiftVerifyDeployment authToken: '', depCfg: 'cotd', namespace: '', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: ''
-          echo '*** Deployment Complete ***'
-     }
+          node {
+              stage ("Build")
+                    echo '*** Build Starting ***'
+                    openshiftBuild bldCfg: 'cotd', buildName: '', checkForTriggeredDeployments: 'false', commitID: '', namespace: '', showBuildLogs: 'true', verbose: 'true'
+                    openshiftVerifyBuild bldCfg: 'cotd', checkForTriggeredDeployments: 'false', namespace: '', verbose: 'false'
+                    echo '*** Build Complete ***'
+              stage ("Deploy and Verify in Development Env")
+                    echo '*** Deployment Starting ***'
+                    openshiftDeploy depCfg: 'cotd', namespace: '', verbose: 'false', waitTime: ''
+                    openshiftVerifyDeployment authToken: '', depCfg: 'cotd', namespace: '', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: ''
+                    echo '*** Deployment Complete ***'
+               }
 
 kind: List
 metadata: {}
@@ -165,48 +165,48 @@ Devプロジェクトで Builds->Pipeline->Start Pipeline を実行し、ビル�
 
 ### CI/CDのためのパイプラインビルド定義
 Devプロジェクトで Builds -> Pipeline -> Edit を選択し、以下の内容で上書きする。
-`withEnv(['GUID=mydemo'])` は、自分の環境に合わせて修正すること。
+`withEnv(['GUID=mydemo', 'DOMAIN=192.168.64.48.nip.io'])` の部分は、自分の環境に合わせて修正すること。
 
 ```
-  node {
-    withEnv(['GUID=mydemo']) {
+node {
+  withEnv(['GUID=mydemo', 'DOMAIN=192.168.64.48.nip.io']) {
 
-      stage ("Build")
-      echo '*** Build Starting ***'
-      openshiftBuild bldCfg: 'cotd', buildName: '', checkForTriggeredDeployments: 'false', commitID: '', namespace: '', showBuildLogs: 'false', verbose: 'false', waitTime: ''
-      openshiftVerifyBuild apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', bldCfg: 'cotd', checkForTriggeredDeployments: 'false', namespace: '', verbose: 'false'
-      echo '*** Build Complete ***'
+    stage ("Build")
+    echo '*** Build Starting ***'
+    openshiftBuild bldCfg: 'cotd', buildName: '', checkForTriggeredDeployments: 'false', commitID: '', namespace: '', showBuildLogs: 'false', verbose: 'false', waitTime: ''
+    openshiftVerifyBuild apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', bldCfg: 'cotd', checkForTriggeredDeployments: 'false', namespace: '', verbose: 'false'
+    echo '*** Build Complete ***'
 
-      stage ("Deploy and Verify in Development Env")
+    stage ("Deploy and Verify in Development Env")
 
-      echo '*** Deployment Starting ***'
-      openshiftDeploy apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', depCfg: 'cotd', namespace: '', verbose: 'false', waitTime: ''
-      openshiftVerifyDeployment apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', depCfg: 'cotd', namespace: '', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: ''
-      echo '*** Deployment Complete ***'
+    echo '*** Deployment Starting ***'
+    openshiftDeploy apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', depCfg: 'cotd', namespace: '', verbose: 'false', waitTime: ''
+    openshiftVerifyDeployment apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', depCfg: 'cotd', namespace: '', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: ''
+    echo '*** Deployment Complete ***'
 
-      echo '*** Service Verification Starting ***'
-      openshiftVerifyService apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', namespace: 'pipeline-${GUID}-dev', svcName: 'cotd', verbose: 'false'
-      echo '*** Service Verification Complete ***'
-      openshiftTag(srcStream: 'cotd', srcTag: 'latest', destStream: 'cotd', destTag: 'testready')
+    echo '*** Service Verification Starting ***'
+    openshiftVerifyService apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', namespace: 'pipeline-${GUID}-dev', svcName: 'cotd', verbose: 'false'
+    echo '*** Service Verification Complete ***'
+    openshiftTag(srcStream: 'cotd', srcTag: 'latest', destStream: 'cotd', destTag: 'testready')
 
-      stage ('Deploy and Test in Testing Env')
-      echo '*** Deploy testready build in pipeline-${GUID}-test project  ***'
-      openshiftDeploy apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', depCfg: 'cotd', namespace: 'pipeline-${GUID}-test', verbose: 'false', waitTime: ''
+    stage ('Deploy and Test in Testing Env')
+    echo '*** Deploy testready build in pipeline-${GUID}-test project  ***'
+    openshiftDeploy apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', depCfg: 'cotd', namespace: 'pipeline-${GUID}-test', verbose: 'false', waitTime: ''
 
-      openshiftVerifyDeployment apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', depCfg: 'cotd', namespace: 'pipeline-${GUID}-test', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '10'
-      sh 'curl http://cotd-pipeline-${GUID}-test.apps.nobusue.net/data/ | grep cats -q'
+    openshiftVerifyDeployment apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', depCfg: 'cotd', namespace: 'pipeline-${GUID}-test', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '10'
+    sh 'curl http://cotd-pipeline-${GUID}-test.${DOMAIN}/data/ | grep cats -q'
 
-      stage ('Promote and Verify in Production Env')
-      echo '*** Waiting for Input ***'
-      input 'Should we deploy to Production?'
-      openshiftTag(srcStream: 'cotd', srcTag: 'testready', destStream: 'cotd', destTag: 'prodready')
-      echo '*** Deploying to Production ***'
-      openshiftDeploy apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', depCfg: 'cotd', namespace: 'pipeline-${GUID}-prod', verbose: 'false', waitTime: ''
-      openshiftVerifyDeployment apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', depCfg: 'cotd', namespace: 'pipeline-${GUID}-prod', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '10'
-      sleep 10
-      sh 'curl http://cotd-pipeline-${GUID}-prod.apps.nobusue.net/data/ | grep cats -q'
-    }
+    stage ('Promote and Verify in Production Env')
+    echo '*** Waiting for Input ***'
+    input 'Should we deploy to Production?'
+    openshiftTag(srcStream: 'cotd', srcTag: 'testready', destStream: 'cotd', destTag: 'prodready')
+    echo '*** Deploying to Production ***'
+    openshiftDeploy apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', depCfg: 'cotd', namespace: 'pipeline-${GUID}-prod', verbose: 'false', waitTime: ''
+    openshiftVerifyDeployment apiURL: 'https://openshift.default.svc.cluster.local', authToken: '', depCfg: 'cotd', namespace: 'pipeline-${GUID}-prod', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '10'
+    sleep 10
+    sh 'curl http://cotd-pipeline-${GUID}-prod.${DOMAIN}/data/ | grep cats -q'
   }
+}
 ```
 
 ### パイプラインビルド実行
@@ -237,8 +237,17 @@ index 6727422..bc6d30d 100755
 データの実体は `cotd/data/<キーワード>.php` に定義されている。
 
 修正後、Devプロジェクトで Builds->Pipeline->Start Pipeline を実行し、ビルド完了まで待つ。
-ビルドが正常に進むと、Prod環境へのデプロイの直前で承認を求められる状態でストップするので、Yes or No を選択する。
 
+ビルドが正常に進むと、Prod環境へのデプロイの直前で承認を求められる状態でストップするので、一旦全環境のアプリケーションを表示してみる。
+Dev/Testは新しいバージョンに更新されており、Prodは旧バージョンのままになっているはず。
+
+![cicd_1](cicd_1.png)
+
+次に、"Proceed"に対して Yes or No を選択する。
+
+![cicd_2](cicd_2.png)
+
+Yesを選択すると、Prodが新しいバージョンに更新される。
 
 ## 参考情報
 https://stefanopicozzi.blog/2016/10/18/pipelines-with-openshift/
