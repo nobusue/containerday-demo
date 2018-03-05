@@ -243,11 +243,11 @@ Dev/Testは新しいバージョンに更新されており、Prodは旧バー�
 
 ![cicd_1](cicd_1.png)
 
-次に、"Proceed"に対して Yes or No を選択する。
+次に、"Input Required"に対して *Proceed* or *Abort* を選択する。
 
 ![cicd_2](cicd_2.png)
 
-Yesを選択すると、Prodが新しいバージョンに更新される。
+*Proceed* を選択すると、Prod環境のアプリケーションが新しいバージョンに更新される。
 
 ## 参考情報
 https://stefanopicozzi.blog/2016/10/18/pipelines-with-openshift/
