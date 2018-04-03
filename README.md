@@ -1,13 +1,13 @@
 # Container Day デモコンテンツ
 
 - scaleout/
-  - Dokcerイメージのデプロイ
+  - Dockerイメージのデプロイ
   - Podのスケールアウト
   - オートヒーリング
 - infraci/
   - ミドルウェアレイヤの自動アップデート
 - paas/
-  - s2iによるDokerを意識しないビルドとデプロイ
+  - s2iによるDockerを意識しないビルドとデプロイ
   - アプリケーションログ参照
   - リソース監視
 - cicd/
