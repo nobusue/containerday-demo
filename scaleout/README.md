@@ -19,6 +19,11 @@ OpenShiftのデフォルトではrootユーザーでのコンテナ実行が禁�
 oc login $OCP_MASTER -u system:admin
 oc adm policy add-scc-to-user anyuid -z default -n scaleout
 ```
+上記の設定を完了後、元のユーザー（developer）／プロジェクト（scaleout）に戻っておくと良いでしょう。
+```
+oc login $OCP_MASTER -u developer
+oc project scaleout
+```
 
 ## Dockerイメージデプロイ
 ホスト名を表示するNginxコンテナを実行する。
@@ -38,7 +43,7 @@ oc expose svc nginx-hostname
 以下でURLを確認し、アプリケーション画面を表示してみる。
 
 ```
-oc get route nginx-hostname --template='{{.spec.host}}
+oc get route nginx-hostname --template='{{.spec.host}}'
 ```
 
 ホスト名=Pod名であることに言及する。
